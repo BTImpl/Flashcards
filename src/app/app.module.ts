@@ -11,7 +11,8 @@ import { LearnWordsComponent } from './pages/learn-words/learn-words.component';
 import { AskWordsComponent } from './pages/ask-words/ask-words.component';
 import { HomeComponent } from './pages/home/home.component';
 import { NavigationCardComponent } from './pages/home/navigation-card/navigation-card.component';
-import { TranslateModule } from '@ngx-translate/core';
+import { I18nModule } from './i18n.module';
+
 
 @NgModule({
   declarations: [
@@ -28,6 +29,8 @@ import { TranslateModule } from '@ngx-translate/core';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    I18nModule
+
   ],
   providers: [],
   bootstrap: [AppComponent]

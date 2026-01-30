@@ -9,6 +9,8 @@ import { Router } from '@angular/router';
 })
 export class NavigationCardComponent {
   @Input() action: string = '';
+  @Input() displayName: string = '';
+  @Input() iconClass: string = '';
 
   constructor(private router: Router) { }
 
