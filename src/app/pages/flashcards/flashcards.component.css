@@ -1,0 +1,18 @@
+/* A fő konténer (cards) legyen oszlopos flex, a word-card töltse ki a helyet */
+#cards {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+app-word-card {
+  flex: 1 1 auto;
+  display: flex;
+}
+:host {
+  display: flex;
+  flex: 1 1 auto;
+}
+
+.row.flex-grow-1 {
+  height: 90%;
+}
