@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-word-card',
-  templateUrl: './word-card.component.html',
-  styleUrls: ['./word-card.component.css']
+    selector: 'app-word-card',
+    templateUrl: './word-card.component.html',
+    styleUrls: ['./word-card.component.css'],
+    standalone: false
 })
 export class WordCardComponent {
 
