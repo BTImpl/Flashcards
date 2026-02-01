@@ -1,27 +1,23 @@
 <div class="ps-1 pe-1">
-
   <div class="row pt-1">
     <div class="col-6">
-      <button class="col-12 btn btn-secondary" onclick="changeSheet()">
+      <button class="col-12 btn btn-secondary" (click)="chanegeUser()">
         <i class="fa fa-user"></i>
-        <span id="sheet">{{user}}</span>
+        <span id="sheet">{{model.user}}</span>
       </button>
     </div>
     <div class="col-6">
-      <button class="col-12 btn btn-success" id="deckButton" onclick="changeDeck()">
+      <button class="col-12 btn btn-success" id="deckButton" (click)="changeList()" >
         <i id="deckButtonIcon" class="fa fa-exclamation" aria-hidden="true"></i>
-        <span id="deckButtonText">{{listName}}</span>
+        <span id="deckButtonText">{{model.list}}</span>
       </button>
     </div>
   </div>
-
   <div class="row m-0 pt-1">
     <div class="col-12 p-0 m-0">
       <button class="bg-primary text-white text-center w-100 border-0 rounded-1" (click)="toHome()">
-        <h1 class="m-0"><i class="fa fa-home" aria-hidden="true"></i>Home</h1>
+        <h1 class="m-0"><i class="fa fa-home" aria-hidden="true"></i>{{'button.home' | translate}}</h1>
       </button>
     </div>
   </div>
-
-
 </div>
