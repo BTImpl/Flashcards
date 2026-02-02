@@ -1,22 +1,20 @@
-<div id="cards" class="container-fluid min-vh-100 d-flex flex-column p-2">
+<div>
+  <app-word-card [word]="words[actualWordIdx]"></app-word-card>
 
-        <app-word-card></app-word-card>
-
-         <div class="row ps-2">
-            <div class="col-4 ">
-                <button class="col-12 btn btn-dark" onclick="step(-1)">
-                    <i class="fa fa-arrow-left"></i>
-                    <span>Prev</span>
-                </button>
-            </div>
-            <div class="col-4 text-center">
-                <h1 class="col-12" style="display: inline;" id="actualWord"></h1>
-            </div>
-            <div class="col-4">
-                <button class="col-12 btn btn-dark" onclick="step(1)">
-                    <span>Next</span>
-                    <i class="fa fa-arrow-right"></i>
-                </button>
-            </div>
-        </div>
+  <div class="row">
+    <div class="col-4 ">
+      <button class="col-12 btn btn-dark" onclick="step(-1)">
+        <i class="fa fa-arrow-left"></i>
+        <span>Prev</span>
+      </button>
     </div>
+    <div class="col-4 text-center">
+      <h1 class="col-12" id="actualWord"> {{ actualWordIdx + 1}} / {{words.length}}</h1>
+    </div>
+    <div class="col-4">
+      <button class="col-12 btn btn-dark" onclick="step(1)">
+        <span>Next</span>
+        <i class="fa fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>

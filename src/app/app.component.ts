@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { WordService } from './services/words.service';
+import { Word, Words } from './model/words.model';
 
 @Component({
     selector: 'app-root',

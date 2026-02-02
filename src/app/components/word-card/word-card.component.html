@@ -1,11 +1,11 @@
 
-        <div class="row flex-grow-1 p-3" onclick="">
-            <div id="wordCard" class="text-center p-4 card bg-dark text-white ">
-                <div id='speakBtn' class="card bg-info text-white text-center">
-                    <h1><i class="fa fa-volume-up" aria-hidden="true"></i></h1>
-                </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
-                    <h1 id="word">Loading data...</h1>
-                </div>
-            </div>
-        </div>
+
+<div id="wordCard" class="text-center card bg-dark text-white ">
+    <div id='speakBtn' class="card bg-info text-white text-center">
+        <h1><i class="fa fa-volume-up" aria-hidden="true"></i></h1>
+    </div>
+    <div class="card-body d-flex align-items-center justify-content-center" (click)="flip()">
+        <h1 id="word">{{ value }}</h1>
+    </div>
+</div>
+
