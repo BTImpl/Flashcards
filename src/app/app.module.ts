@@ -12,26 +12,28 @@ import { AskWordsComponent } from './pages/ask-words/ask-words.component';
 import { HomeComponent } from './pages/home/home.component';
 import { NavigationCardComponent } from './pages/home/navigation-card/navigation-card.component';
 import { I18nModule } from './i18n.module';
+import { FormsModule } from '@angular/forms';
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    WordCardComponent,
     FlashcardsComponent,
     HeaderComponent,
     PairingComponent,
     LearnWordsComponent,
     AskWordsComponent,
     HomeComponent,
-    NavigationCardComponent
+    NavigationCardComponent,
+    WordCardComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    I18nModule
+    I18nModule,
+    FormsModule
 
-  ],
+],
   providers: [],
   bootstrap: [AppComponent]
 })

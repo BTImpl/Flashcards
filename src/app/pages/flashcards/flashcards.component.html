@@ -1,9 +1,9 @@
 <div>
-  <app-word-card [word]="words[actualWordIdx]"></app-word-card>
+  <app-word-card [word]="actual" (cardClicked)="flip()"></app-word-card>
 
   <div class="row">
     <div class="col-4 ">
-      <button class="col-12 btn btn-dark" onclick="step(-1)">
+      <button class="col-12 btn btn-dark" (click)="previous()">
         <i class="fa fa-arrow-left"></i>
         <span>Prev</span>
       </button>
@@ -12,7 +12,7 @@
       <h1 class="col-12" id="actualWord"> {{ actualWordIdx + 1}} / {{words.length}}</h1>
     </div>
     <div class="col-4">
-      <button class="col-12 btn btn-dark" onclick="step(1)">
+      <button class="col-12 btn btn-dark" (click)="next()">
         <span>Next</span>
         <i class="fa fa-arrow-right"></i>
       </button>

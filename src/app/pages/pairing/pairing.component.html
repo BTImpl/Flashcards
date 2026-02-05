@@ -1,43 +1,33 @@
-<div id="cards" class="d-flex flex-column min-vh-100">
-  <div class="flex-fill">
-    <div class="container">
-      <div id="cardrow" class="row  ">
-        <app-word-card class="col-6"></app-word-card>
-        <app-word-card class="col-6"></app-word-card>
-        <app-word-card class="col-6"></app-word-card>
-        <app-word-card class="col-6"></app-word-card>
-        <app-word-card class="col-6"></app-word-card>
-        <app-word-card class="col-6"></app-word-card>
-        <app-word-card class="col-6"></app-word-card>
-        <app-word-card class="col-6"></app-word-card>
+<div id="cards" class="flex-column">
 
-      </div>
 
+    <div class="row " *ngFor="let w of actualWords; let i = index">
+      <app-word-card class="col-6" (cardClicked)="wordClicked('en', i)" [word]="w.en">
+      </app-word-card>
+      <app-word-card class="col-6" (cardClicked)="wordClicked('hu', i)" [word]="shuffledWords[i].hu">
+      </app-word-card>
     </div>
-  </div>
 
 
-  <footer class="py-3">
-    <div class="container">
+  <footer>
       <div class="row">
         <div class="col-4 ">
-          <button class="col-12 btn btn-dark" onclick="step(-1)">
+          <button class="col-12 btn btn-dark"
+            [disabled]="actualStartIndex === 0"
+            (click)="prev()">
             <i class="fa fa-arrow-left"></i>
             <span>Prev</span>
           </button>
         </div>
         <div class="col-4 text-center">
-          <h3 class="col-12" style="display: inline;" id="actualWord">&nbsp;</h3>
+          <h3 class="col-12" style="display: inline;" id="actualWord">{{actualStartIndex +1}}-{{actualStartIndex+displayedWordsCount}}/{{lenth}}</h3>
         </div>
         <div class="col-4">
-          <button class="col-12 btn btn-dark" onclick="step(1)">
+          <button class="col-12 btn btn-dark" [disabled]="actualStartIndex + displayedWordsCount  === lenth" (click)="next()">
             <span>Next</span>
             <i class="fa fa-arrow-right"></i>
           </button>
         </div>
       </div>
-
-    </div>
-
   </footer>
 </div>

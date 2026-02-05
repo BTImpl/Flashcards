@@ -6,10 +6,12 @@ describe('WordCardComponent', () => {
   let component: WordCardComponent;
   let fixture: ComponentFixture<WordCardComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      declarations: [WordCardComponent]
-    });
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [WordCardComponent]
+    })
+    .compileComponents();
+
     fixture = TestBed.createComponent(WordCardComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

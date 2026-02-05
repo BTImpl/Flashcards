@@ -1,28 +1,26 @@
-import { Component, Input } from '@angular/core';
-import { Word } from 'src/app/model/words.model';
+import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { WordCardModel } from './word-card.model';
+import { WordService } from 'src/app/services/words.service';
 
 @Component({
-    selector: 'app-word-card',
-    templateUrl: './word-card.component.html',
+  selector: 'app-word-card',
+
+  templateUrl: './word-card.component.html',
     styleUrls: ['./word-card.component.css'],
-    standalone: false
+  standalone: false
 })
 export class WordCardComponent {
-  @Input() word: Word = { hu: '', en: '' };
-  actualLang: keyof Word = 'en';
-  value: string = '';
+  @Input() word: WordCardModel = { value: '', visible: true, activeClass: 'bg-dark', speakable: false };
+  @Output() cardClicked = new EventEmitter<void>();
 
-  constructor(){
-    alert(JSON.stringify(this.word));
-    this.value = this.word[this.actualLang];
+   private wordService = inject(WordService);
+
+  wordClicked() {
+    this.cardClicked.emit();
   }
 
-  flip(){
-    if(this.actualLang === 'en'){
-      this.actualLang = 'hu';
-    } else {
-      this.actualLang = 'en';
-    }
-     this.value = this.word[this.actualLang];
+  speak(event: Event){
+    this.wordService.speakPhrase(this.word.value);
+    event.stopPropagation();
   }
 }
