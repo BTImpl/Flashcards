@@ -1,0 +1,24 @@
+/* word-card.component.css */
+:host {
+  display: block;
+  height: 100%; /* A szülőtől kapott magasság átvétele */
+}
+
+.card {
+  margin: .2rem;
+  height: 100%;       /* Ez feszíti ki a kártyát */
+  display: flex;      /* Hogy a tartalmat középre tudjuk tenni */
+  flex-direction: column;
+  justify-content: center; /* Függőlegesen középre teszi a h1-et */
+  position: relative; /* A gomb pozicionálásához jó lehet */
+}
+
+/* Ha a kártyán belüli gombot a sarokba tennéd, ne tolja el a szöveget */
+button.bg-info {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  border: none;
+  border-radius: 5px;
+  padding: 10px;
+}

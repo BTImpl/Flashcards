@@ -1,17 +1,18 @@
+/* styles.css */
 html, body {
+  height: 100%;
   margin: 0;
 }
 
-/* Az Angular gyökér eleme is legyen 100% magas és Flex */
-
-footer {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
+app-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
+/* A main táguljon ki, hogy kitöltse a maradék helyet a header alatt */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
