@@ -16,8 +16,9 @@
 /* Ha a kártyán belüli gombot a sarokba tennéd, ne tolja el a szöveget */
 button.bg-info {
   position: absolute;
+  margin: .1rem;
   top: 0;
-  width: 100%;
+  width: 99%;
   border: none;
   border-radius: 5px;
   padding: 10px;

@@ -1,0 +1,16 @@
+/* gyerek-komponens.component.css */
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Kitölti a main-t */
+  height: 100%;
+}
+
+/* Ez az a div, amit a HTML-edben írtál */
+.container-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* A kártya felül, a footer alul marad */
+  height: 100%;
+  width: 100%;
+}

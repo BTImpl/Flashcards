@@ -1,15 +1,15 @@
-<div id="cards" class="flex-column">
+<div class="container-div" >
 
 
-    <div class="row " *ngFor="let w of actualWords; let i = index">
-      <app-word-card class="col-6" (cardClicked)="wordClicked('en', i)" [word]="w.en">
+    <div class="row " style="height: 100%;" *ngFor="let w of actualWords; let i = index">
+      <app-word-card class="col-6" style="padding-left: 1rem; padding-right: 0; padding-bottom: .5rem;" (cardClicked)="wordClicked('en', i)" [word]="w.en">
       </app-word-card>
-      <app-word-card class="col-6" (cardClicked)="wordClicked('hu', i)" [word]="shuffledWords[i].hu">
+      <app-word-card class="col-6" style="padding-right: 1rem; padding-left: 0; padding-bottom: .5rem;" (cardClicked)="wordClicked('hu', i)" [word]="shuffledWords[i].hu">
       </app-word-card>
     </div>
 
 
-  <footer>
+  <footer class="p-1">
       <div class="row">
         <div class="col-4 ">
           <button class="col-12 btn btn-dark"
