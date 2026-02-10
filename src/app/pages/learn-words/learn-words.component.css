@@ -25,3 +25,10 @@
 app-word-card {
   height: 100%;
 }
+
+.d-flex img {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+  cursor: pointer;
+}
