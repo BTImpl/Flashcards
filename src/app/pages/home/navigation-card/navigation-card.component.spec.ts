@@ -8,8 +8,8 @@ describe('NavigationCardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [NavigationCardComponent]
-    });
+    imports: [NavigationCardComponent]
+});
     fixture = TestBed.createComponent(NavigationCardComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

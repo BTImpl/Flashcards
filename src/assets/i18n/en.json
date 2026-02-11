@@ -1,6 +1,7 @@
 {
   "button": {
-    "home": "Home"
+    "home": "Home",
+    "restart": "Restart"
   },
   "home": {
     "flashcards": "Flashcards",

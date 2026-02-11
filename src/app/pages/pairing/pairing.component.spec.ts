@@ -8,8 +8,8 @@ describe('PairingComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [PairingComponent]
-    });
+    imports: [PairingComponent]
+});
     fixture = TestBed.createComponent(PairingComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

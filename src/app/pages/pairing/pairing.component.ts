@@ -2,12 +2,14 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Word } from 'src/app/model/words.model';
 import { WordService } from 'src/app/services/words.service';
 import { PairingForm, PairingWord } from './pairing.model';
+import { NgFor } from '@angular/common';
+import { WordCardComponent } from '../../components/word-card/word-card.component';
 
 @Component({
     selector: 'app-pairing',
     templateUrl: './pairing.component.html',
     styleUrls: ['./pairing.component.css'],
-    standalone: false
+    imports: [NgFor, WordCardComponent]
 })
 export class PairingComponent implements OnInit {
 private wordService = inject(WordService);

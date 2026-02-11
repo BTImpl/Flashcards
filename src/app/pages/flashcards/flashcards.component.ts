@@ -2,12 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { WordCardModel } from 'src/app/components/word-card/word-card.model';
 import { Word } from 'src/app/model/words.model';
 import { WordService } from 'src/app/services/words.service';
+import { WordCardComponent } from '../../components/word-card/word-card.component';
 
 @Component({
-  selector: 'app-flashcards',
-  templateUrl: './flashcards.component.html',
-  styleUrls: ['./flashcards.component.css'],
-  standalone: false,
+    selector: 'app-flashcards',
+    templateUrl: './flashcards.component.html',
+    styleUrls: ['./flashcards.component.css'],
+    imports: [WordCardComponent],
 })
 export class FlashcardsComponent implements OnInit {
   words = this.wordService.getWords();

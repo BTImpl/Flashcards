@@ -1,19 +1,23 @@
 <div class="container-div">
   <div class="d-flex mt-2 bg-success m-1">
     <div class="col-2">
-      <div class="btn btn-success" (click)="speak()" [class.invisible]="questionLang === 'hu'">
+      <button class="btn btn-success" (click)="speak()" (keydown.enter)="speak()" [class.invisible]="questionLang === 'hu'" aria-label="Speak word">
         <i class="fa fa-volume-up" aria-hidden="true"></i>
-      </div>
+      </button>
     </div>
     <div class="col-8 text-white text-center">
       <h1 id="actualHu">{{ actualWord[questionLang].value }}</h1>
     </div>
     <div class="col-2">
       @if(questionLang === 'en') {
-        <img src="../../../assets/images/hu.png" alt="lang" (click)="toggleLang()">
+        <button class="btn btn-success" (click)="toggleLang()" (keydown.enter)="toggleLang()" aria-label="Switch to Hungarian">
+          <img src="../../../assets/images/hu.png" alt="">
+        </button>
       }
       @if(questionLang === 'hu') {
-        <img src="../../../assets/images/en.png" alt="lang" (click)="toggleLang()">
+        <button class="btn btn-success" (click)="toggleLang()" (keydown.enter)="toggleLang()" aria-label="Switch to English">
+          <img src="../../../assets/images/en.png" alt="">
+        </button>
       }
     </div>
   </div>
@@ -30,7 +34,12 @@
     </div>
   }
   @if (actualIdx == cards.length) {
-    <button class="btn btn-primary" (click)="restart()">Restart</button>
+
+    <div class="restart">
+<button class="btn btn-primary" (click)="restart()">
+  <h3>{{'button.restart' | translate}}</h3>
+</button>
+    </div>
   }
   <footer class="p-1">
     <div class="row">

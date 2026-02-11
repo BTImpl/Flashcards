@@ -2,12 +2,13 @@ import { Component, inject, OnInit } from '@angular/core';
 import { timer } from 'rxjs';
 import { Word } from 'src/app/model/words.model';
 import { WordService } from 'src/app/services/words.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-ask-words',
     templateUrl: './ask-words.component.html',
     styleUrls: ['./ask-words.component.css'],
-    standalone: false
+    imports: [FormsModule]
 })
 export class AskWordsComponent implements OnInit {
   private wordService = inject(WordService);

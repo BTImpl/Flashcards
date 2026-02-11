@@ -1,12 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeaderModel, KnownUnknownEnum, UsersEnum } from 'src/app/model/header.model';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-header',
     templateUrl: './header.component.html',
     styleUrls: ['./header.component.css'],
-    standalone: false
+    imports: [TranslatePipe]
 })
 export class HeaderComponent {
   private router = inject(Router);

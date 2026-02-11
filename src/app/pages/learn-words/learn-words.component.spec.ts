@@ -8,8 +8,8 @@ describe('LearnWordsComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [LearnWordsComponent]
-    });
+    imports: [LearnWordsComponent]
+});
     fixture = TestBed.createComponent(LearnWordsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

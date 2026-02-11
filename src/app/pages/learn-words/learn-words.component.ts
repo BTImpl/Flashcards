@@ -1,17 +1,22 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { WordCardModel } from 'src/app/components/word-card/word-card.model';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
+import { timer } from 'rxjs';
 import { WordService } from 'src/app/services/words.service';
+import { WordCardComponent } from '../../components/word-card/word-card.component';
 import { LearnWordModel } from './learn-word.model';
-import { of, timer } from 'rxjs';
 
 @Component({
     selector: 'app-learn-words',
     templateUrl: './learn-words.component.html',
     styleUrls: ['./learn-words.component.css'],
-    standalone: false
+    standalone: true,
+    imports: [CommonModule, FormsModule, WordCardComponent, TranslatePipe]
 })
-export class LearnWordsComponent {
+export class LearnWordsComponent implements OnInit {
   private wordService = inject(WordService);
+  private cdr = inject(ChangeDetectorRef);
   cards: LearnWordModel[] = [];
   actualIdx = 0;
   actualWord: LearnWordModel = { hu: { value: '', visible: true, activeClass: 'bg-dark', speakable: false }, en: { value: '', visible: true, activeClass: 'bg-dark', speakable: false } };
@@ -44,9 +49,10 @@ export class LearnWordsComponent {
         this.success++;
       }
       this.possibleWords[idx][this.answerLang].activeClass = 'bg-success';
-      timer(500).subscribe(() => {
+      timer(200).subscribe(() => {
         this.actualIdx++;
         this.next(this.actualIdx);
+        this.cdr.markForCheck();
       });
     } else {
       if(!this.wasFailed){
@@ -68,6 +74,7 @@ export class LearnWordsComponent {
     this.actualWord = this.cards[idx];
     this.possibleWords = this.getRandomWordsExcept(this.cards);
     this.possibleWords.push(this.actualWord);
+    this.wordService.shuffle(this.possibleWords);
   }
 
   restart(){
