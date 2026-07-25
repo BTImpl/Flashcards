@@ -1,0 +1,27 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main   # vagy master, attól függően melyik a fő branch-ed
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Trello kártya azonosító kinyerése a commit üzenetből
+        id: extract-card
+        run: |
+          CARD_ID=$(git log -1 --pretty=%B | grep -oP 'Trello-Card-Id:\s*\K\S+' || true)
+          echo "card_id=$CARD_ID" >> "$GITHUB_OUTPUT"
+
+      - name: Trello kártya lezárása (Done)
+        if: steps.extract-card.outputs.card_id != ''
+        run: |
+          curl -sf -X PUT \
+            "https://api.trello.com/1/cards/${{ steps.extract-card.outputs.card_id }}?idList=${{ vars.TRELLO_DONE_LIST_ID }}&key=${{ secrets.TRELLO_API_KEY }}&token=${{ secrets.TRELLO_TOKEN }}"
