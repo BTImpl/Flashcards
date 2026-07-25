@@ -1,0 +1,21 @@
+# Ez a fájl kerül minden ÚJ PROJEKT repójába (a GitHub template repo része).
+# Maga a logika a központi <org>/claude-kanban-workflows repóban van --
+# ez csak vékony "hívó" réteg, ami a repository_dispatch eseményt
+# összekapcsolja a közös reusable workflow-val.
+
+name: Claude task dispatch
+
+on:
+  repository_dispatch:
+    types: [claude-task]
+
+jobs:
+  run-task:
+    # Cseréld le <org>-ot a saját GitHub org/felhasználóneveddre.
+    uses: BTImpl/central-workflows/.github/workflows/claude-task.yml@main
+    with:
+      task_title: ${{ github.event.client_payload.title }}
+      task_description: ${{ github.event.client_payload.description }}
+      trello_card_id: ${{ github.event.client_payload.trello_card_id }}
+      trello_review_list_id: ${{ github.event.client_payload.trello_review_list_id }}
+    secrets: inherit

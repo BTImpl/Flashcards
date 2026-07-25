@@ -1,15 +1,20 @@
 <div
-  class="card text-center text-white"
-  [class.invisible]="!word.visible"
-  [ngClass]="word.activeClass"
+  class="card text-center text-white d-flex flex-column justify-content-center position-relative h-100"
+  [class.invisible]="!word().visible"
+  [class]="word().activeClass"
   (click)="wordClicked()"
 >
   <button
-    class="bg-info text-white"
+    class="bg-info text-white position-absolute top-0 border-0 rounded-1"
     (click)="speak($event)"
-    [class.invisible]="!word.speakable"
+    [class.invisible]="!word().speakable"
   >
     <span class="fa fa-volume-up" aria-hidden="true"></span>
   </button>
-  <h1 style="font-size: inherit;">{{ word.value }}</h1>
+  <h1
+    [appFitText]="word().value ?? ''"
+    [maxFontSize]="maxFontSize()"
+    [minFontSize]="minFontSize()"
+    [attr.lang]="word().lang"
+  >{{ word().value }}</h1>
 </div>

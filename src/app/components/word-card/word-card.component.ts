@@ -1,18 +1,22 @@
-import { Component, EventEmitter, inject, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
 import { WordCardModel } from './word-card.model';
 import { WordService } from 'src/app/services/words.service';
-import { NgClass } from '@angular/common';
+import { FitTextDirective } from 'src/app/directives/fit-text.directive';
 
 @Component({
     selector: 'app-word-card',
     templateUrl: './word-card.component.html',
-    styleUrls: ['./word-card.component.css'],
-    imports: [NgClass],
-    standalone: true
+    styleUrls: ['./word-card.component.scss'],
+    imports: [FitTextDirective],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { class: 'd-block h-100' },
 })
 export class WordCardComponent {
-  @Input({required: true}) word!: WordCardModel;
-  @Output() cardClicked = new EventEmitter<void>();
+  word = input.required<WordCardModel>();
+  maxFontSize = input(40);
+  minFontSize = input(13);
+  cardClicked = output<void>();
 
    private wordService = inject(WordService);
 
@@ -21,7 +25,7 @@ export class WordCardComponent {
   }
 
   speak(event: Event){
-    this.wordService.speakPhrase(this.word?.value);
+    this.wordService.speakPhrase(this.word().value);
     event.stopPropagation();
   }
 }

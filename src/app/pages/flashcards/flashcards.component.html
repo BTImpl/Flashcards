@@ -1,5 +1,5 @@
 @if (actual(); as actualWord) {
-<div class="container-div">
+<div class="d-flex flex-column justify-content-between h-100 w-100">
 
   <app-word-card
       [word]="actualWord"
@@ -19,7 +19,5 @@
   </app-navigation-footer>
 </div>
 } @else {
-  <div class="loading-state">
-    <p>{{'label.loading' | translate}}</p>
-  </div>
+  <app-loading-state>{{ 'label.loading' | translate }}</app-loading-state>
 }

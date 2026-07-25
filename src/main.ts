@@ -1,15 +1,25 @@
-import { provideZoneChangeDetection, importProvidersFrom } from "@angular/core";
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideTranslateService } from '@ngx-translate/core';
+import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
-
-import { BrowserModule, bootstrapApplication } from "@angular/platform-browser";
-import { AppRoutingModule } from "./app/app-routing.module";
-import { I18nModule } from "./app/i18n.module";
-import { FormsModule } from "@angular/forms";
-import { AppComponent } from "./app/app.component";
-
+import { AppComponent } from './app/app.component';
+import { routes } from './app/app.routes';
 
 bootstrapApplication(AppComponent, {
-    providers: [importProvidersFrom(BrowserModule, AppRoutingModule, I18nModule, FormsModule)]
-})
-  .catch(err => console.error(err));
+  providers: [
+    provideZonelessChangeDetection(),
+    provideRouter(routes),
+    provideHttpClient(),
+    provideTranslateService({
+      lang: 'en',
+      fallbackLang: 'en',
+      loader: provideTranslateHttpLoader({
+        prefix: './assets/i18n/',
+        suffix: '.json',
+      }),
+    }),
+  ],
+}).catch((err) => console.error(err));

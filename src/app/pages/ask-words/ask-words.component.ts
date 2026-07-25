@@ -1,42 +1,35 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
-import { Word } from 'src/app/model/words.model';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { WordService } from 'src/app/services/words.service';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
-import { NavigationFooterComponent } from "src/app/navigation-footer/navigation-footer.component";
-import { WordStore } from 'src/app/services/word.store';
-import { CommonModule } from '@angular/common';
+import { NavigationFooterComponent } from "src/app/components/navigation-footer/navigation-footer.component";
+import { LoadingStateComponent } from 'src/app/components/loading-state/loading-state.component';
+import { WordsStore } from 'src/app/core/state/words.store';
+import { createShuffledWordList } from 'src/app/utils/shuffled-word-list';
 
 @Component({
     selector: 'app-ask-words',
     templateUrl: './ask-words.component.html',
-    styleUrls: ['./ask-words.component.css'],
-    imports: [CommonModule, FormsModule, TranslatePipe, NavigationFooterComponent],
-    standalone: true
+    styleUrls: ['./ask-words.component.scss'],
+    imports: [FormsModule, TranslatePipe, NavigationFooterComponent, LoadingStateComponent],
+    standalone: true,
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    host: { class: 'd-flex flex-column flex-fill h-100' },
 })
 export class AskWordsComponent {
   private wordService = inject(WordService);
-  private wordStore = inject(WordStore);
+  private wordStore = inject(WordsStore);
 
-  private allWords = this.wordStore.words;
+  private nav = createShuffledWordList(this.wordStore.words, (words) => this.wordService.shuffle(words));
 
-  shuffledWords = signal<Word[]>([]);
-  actualIdx = signal(0);
-
-  actualWord = computed(() => this.shuffledWords()[this.actualIdx()]);
+  shuffledWords = this.nav.shuffledWords;
+  actualIdx = this.nav.actualIdx;
+  actualWord = this.nav.actualWord;
+  step = this.nav.step;
 
   helpDisplayed = signal(false);
   isActualFailed = signal(false);
   answer = signal('');
-
-  constructor() {
-    effect(() => {
-      const wordsToShuffle = [...this.allWords()];
-      this.wordService.shuffle(wordsToShuffle);
-      this.shuffledWords.set(wordsToShuffle);
-      this.actualIdx.set(0);
-    });
-  }
 
   check(){
     if (this.answer().toLowerCase() === this.actualWord()?.en.toLowerCase()){
@@ -53,15 +46,5 @@ export class AskWordsComponent {
     setTimeout(() => {
       this.helpDisplayed.set(false);
     }, 2000);
-  }
-
-  step(direction: number){
-    this.actualIdx.update(currentIdx => {
-      const newIdx = currentIdx + direction;
-      if (newIdx >= 0 && newIdx < this.shuffledWords().length) {
-        return newIdx;
-      }
-      return currentIdx;
-    });
   }
 }

@@ -1,33 +1,37 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
-import {
-  WordCardModel,
-  createSimpleWord,
-} from 'src/app/components/word-card/word-card.model';
-import { Word } from 'src/app/model/words.model';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { createSimpleWord } from 'src/app/components/word-card/word-card.model';
 import { WordService } from 'src/app/services/words.service';
 import { WordCardComponent } from '../../components/word-card/word-card.component';
-import { CommonModule } from '@angular/common';
-import { NavigationFooterComponent } from 'src/app/navigation-footer/navigation-footer.component';
-import { WordStore } from 'src/app/services/word.store';
+import { NavigationFooterComponent } from 'src/app/components/navigation-footer/navigation-footer.component';
+import { LoadingStateComponent } from 'src/app/components/loading-state/loading-state.component';
+import { WordsStore } from 'src/app/core/state/words.store';
 import { TranslatePipe } from '@ngx-translate/core';
+import { createShuffledWordList } from 'src/app/utils/shuffled-word-list';
 
 @Component({
   selector: 'app-flashcards',
   templateUrl: './flashcards.component.html',
-  styleUrls: ['./flashcards.component.css'],
-  imports: [CommonModule, WordCardComponent, NavigationFooterComponent, TranslatePipe],
+  styleUrls: ['./flashcards.component.scss'],
+  imports: [WordCardComponent, NavigationFooterComponent, LoadingStateComponent, TranslatePipe],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'd-flex flex-column flex-fill h-100' },
 })
 export class FlashcardsComponent {
   private wordService = inject(WordService);
-  private wordStore = inject(WordStore);
+  private wordStore = inject(WordsStore);
 
-  private allWords = this.wordStore.words;
+  isFlipped = signal(false);
 
-  shuffledWords = signal<Word[]>([]);
-  actualWordIdx = signal(0);
+  private nav = createShuffledWordList(
+    this.wordStore.words,
+    (words) => this.wordService.shuffle(words),
+    () => this.isFlipped.set(false),
+  );
 
-  actualWord = computed(() => this.shuffledWords()[this.actualWordIdx()]);
+  shuffledWords = this.nav.shuffledWords;
+  actualWordIdx = this.nav.actualIdx;
+  actualWord = this.nav.actualWord;
 
   enWord = computed(() => {
     const word = this.actualWord();
@@ -39,32 +43,14 @@ export class FlashcardsComponent {
     return word ? createSimpleWord(word.hu, false) : undefined;
   });
 
-  isFlipped = signal(false);
   actual = computed(() => (this.isFlipped() ? this.huWord() : this.enWord()));
 
-  constructor() {
-    effect(() => {
-      const wordsToShuffle = [...this.allWords()];
-      this.wordService.shuffle(wordsToShuffle);
-      this.shuffledWords.set(wordsToShuffle);
-      this.reset();
-    });
-  }
-
-  reset() {
-    this.actualWordIdx.set(0);
-    this.isFlipped.set(false);
-  }
-
   step(direction: number) {
-    this.actualWordIdx.update((currentIdx) => {
-      const newIdx = currentIdx + direction;
-      if (newIdx >= 0 && newIdx < this.shuffledWords().length) {
-        this.isFlipped.set(false);
-        return newIdx;
-      }
-      return currentIdx;
-    });
+    const previousIdx = this.actualWordIdx();
+    this.nav.step(direction);
+    if (this.actualWordIdx() !== previousIdx) {
+      this.isFlipped.set(false);
+    }
   }
 
   flip() {

@@ -1,20 +1,22 @@
-import { Component, computed, effect, inject, signal, untracked } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { TranslatePipe } from '@ngx-translate/core';
 import { WordService } from 'src/app/services/words.service';
 import { WordCardComponent } from '../../components/word-card/word-card.component';
 import { LearnWordData, LangKey } from './learn-word.model';
-import { WordStore } from 'src/app/services/word.store';
+import { WordsStore } from 'src/app/core/state/words.store';
+import { FitTextDirective } from 'src/app/directives/fit-text.directive';
 
 @Component({
   selector: 'app-learn-words',
   templateUrl: './learn-words.component.html',
-  styleUrls: ['./learn-words.component.css'],
+  styleUrls: ['./learn-words.component.scss'],
   standalone: true,
-  imports: [CommonModule, WordCardComponent, TranslatePipe],
+  imports: [WordCardComponent, TranslatePipe, FitTextDirective],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'd-flex flex-column flex-fill h-100' },
 })
 export class LearnWordsComponent {
-  private wordStore = inject(WordStore);
+  private wordStore = inject(WordsStore);
   private wordService = inject(WordService);
 
   readonly questionLang = signal<LangKey>('en');
@@ -140,20 +142,7 @@ export class LearnWordsComponent {
       visible: true,
       speakable: false,
       activeClass: activeClass,
+      lang: this.answerLang(),
     };
-  }
-
-  getFontSize(word: string): string {
-    if (word.length > 18) return '1rem';
-    if (word.length > 12) return '1.25rem';
-    if (word.length > 8) return '1.5rem';
-    if (word.length > 6) return '2rem';
-    return '2.5rem';
-  }
-
-  getFontSizeTop(word: string): string {
-    if (word.length > 20) return '1rem';
-    if (word.length > 12) return '1.25rem';
-    return '1.5rem';
   }
 }

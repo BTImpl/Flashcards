@@ -1,21 +1,22 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { WordStore } from 'src/app/services/word.store';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { WordsStore } from 'src/app/core/state/words.store';
 import { WordService } from 'src/app/services/words.service';
 import { WordCardComponent } from '../../components/word-card/word-card.component';
-import { NavigationFooterComponent } from "src/app/navigation-footer/navigation-footer.component";
+import { NavigationFooterComponent } from "src/app/components/navigation-footer/navigation-footer.component";
 import { WordCardModel } from 'src/app/components/word-card/word-card.model';
 import { Word } from 'src/app/model/words.model';
 
 @Component({
   selector: 'app-pairing',
   standalone: true,
-  imports: [CommonModule, WordCardComponent, NavigationFooterComponent],
+  imports: [WordCardComponent, NavigationFooterComponent],
   templateUrl: './pairing.component.html',
-  styleUrls: ['./pairing.component.css']
+  styleUrls: ['./pairing.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: { class: 'd-flex flex-column flex-fill h-100' },
 })
 export class PairingComponent {
-  private wordStore = inject(WordStore);
+  private wordStore = inject(WordsStore);
   private wordService = inject(WordService);
 
   readonly displayedWordsCount = 4;

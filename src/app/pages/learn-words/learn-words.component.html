@@ -1,7 +1,7 @@
-<div class="container-div">
+<div class="d-flex flex-column justify-content-between h-100 w-100">
 
-  <div class="d-flex mt-2 bg-success m-1">
-    <div class="col-2">
+  <div class="d-flex align-items-center mt-2 bg-success m-1 py-2 prompt-row">
+    <div class="col-2 header-action-col">
       <button
         class="btn btn-success"
         (click)="speak()"
@@ -11,13 +11,13 @@
       </button>
     </div>
 
-    <div class="col-8 text-white text-center">
+    <div class="col-8 text-white text-center d-flex align-items-center justify-content-center">
       @if (currentWord(); as word) {
-        <h1 id="actualHu" [style.font-size]="getFontSizeTop(word[questionLang()])">{{ word[questionLang()] }}</h1>
+        <h1 id="actualHu" [appFitText]="word[questionLang()]" [maxFontSize]="40" [minFontSize]="13" [attr.lang]="questionLang()">{{ word[questionLang()] }}</h1>
       }
     </div>
 
-    <div class="col-2">
+    <div class="col-2 header-action-col">
       <button class="btn btn-success" (click)="toggleLang()" aria-label="Switch Language">
         <img [src]="questionLang() === 'en' ? '../../../assets/images/hu.png' : '../../../assets/images/en.png'" alt="Language flag">
       </button>
@@ -30,7 +30,7 @@
         <app-word-card
           (cardClicked)="handleWordClick($index, option)"
           [word]="getCardConfig(option, $index)"
-          [style.font-size]="getFontSize(option[answerLang()])">
+          [maxFontSize]="34">
         </app-word-card>
       }
     </div>

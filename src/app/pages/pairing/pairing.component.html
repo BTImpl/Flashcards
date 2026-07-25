@@ -1,26 +1,28 @@
-<div class="container-div">
-  <div class="row" style="height: 100%;" *ngFor="let card of enCards(); let i = index">
+<div class="d-flex flex-column justify-content-between h-100 w-100">
+  @for (card of enCards(); track $index; let i = $index) {
+    <div class="row h-100">
 
-    <app-word-card
-      class="col-6"
-      [word]="card"
-      (cardClicked)="wordClicked('en', i)">
-    </app-word-card>
+      <app-word-card
+        class="col-6"
+        [word]="card"
+        (cardClicked)="wordClicked('en', i)">
+      </app-word-card>
 
-    <app-word-card
-      class="col-6"
-      [word]="huCards()[i]"
-      (cardClicked)="wordClicked('hu', i)">
-    </app-word-card>
+      <app-word-card
+        class="col-6"
+        [word]="huCards()[i]"
+        (cardClicked)="wordClicked('hu', i)">
+      </app-word-card>
 
-  </div>
+    </div>
+  }
 
   <app-navigation-footer
     (backClicked)="prev()"
     (nextClicked)="next()"
     [backDisabled]="actualStartIndex() <= 0"
     [nextDisabled]="actualStartIndex() + displayedWordsCount >= totalLength()">
-    <h3 class="col-12" style="display: inline;">
+    <h3 class="col-12 d-inline">
       {{ actualStartIndex() + 1 }}-{{ actualStartIndex() + enCards().length }} / {{ totalLength() }}
     </h3>
   </app-navigation-footer>

@@ -2,19 +2,20 @@
   <div class="row pt-1">
     <div class="col-6">
       <button class="col-12 btn btn-secondary" (click)="changeUser()">
-        <span class="fa fa-user"></span>
-        <span id="sheet">{{ wordStore.selectedSheet() }}</span>
+        <h1 class="m-0"><span class="fa fa-user"></span> <span id="sheet">{{ wordStore.selectedSheet() }}</span></h1>
       </button>
     </div>
     <div class="col-6">
       <button class="col-12 btn btn-success" (click)="changeList()" >
-        <span
-          id="deckButtonIcon"
-          aria-hidden="true"
-          class="fa"
-          [ngClass]="currentListConfig().iconClass"
-        ></span>
-        <span id="deckButtonText">{{ currentListConfig().labelKey | translate }}</span>
+        <h1 class="m-0">
+          <span
+            id="deckButtonIcon"
+            aria-hidden="true"
+            class="fa"
+            [class]="currentListConfig().iconClass"
+          ></span>
+          <span id="deckButtonText">{{ currentListConfig().labelKey | translate }}</span>
+        </h1>
       </button>
     </div>
   </div>

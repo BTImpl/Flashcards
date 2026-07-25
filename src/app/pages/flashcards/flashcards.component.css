@@ -1,8 +1,0 @@
-
-:host {
-  display: flex;
-  flex-direction: column;
-  flex: 1; /* Kitölti a main-t */
-  height: 100%;
-}
-

@@ -4,7 +4,7 @@
       <button
         class="col-12 btn btn-dark"
         (click)="back()"
-        [disabled]="backDisabled"
+        [disabled]="backDisabled()"
       >
         <span class="fa fa-arrow-left" aria-hidden="true"></span>
         <span>{{ "button.prev" | translate }}</span>
@@ -17,7 +17,7 @@
       <button
         class="col-12 btn btn-dark"
         (click)="next()"
-        [disabled]="nextDisabled"
+        [disabled]="nextDisabled()"
       >
         <span>{{ "button.next" | translate }}</span>
         <span class="fa fa-arrow-right" aria-hidden="true"></span>

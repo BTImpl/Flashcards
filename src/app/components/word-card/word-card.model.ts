@@ -3,6 +3,7 @@ export interface WordCardModel {
   visible?: boolean;
   activeClass?: string;
   speakable?: boolean;
+  lang?: string;
 }
 
 export const createSimpleWord = (val: string, spek: boolean):WordCardModel => ({

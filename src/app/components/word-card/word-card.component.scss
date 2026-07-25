@@ -1,0 +1,22 @@
+@use 'variables' as bs;
+
+.card {
+  margin: bs.$spacer * 0.2;
+}
+
+.card h1 {
+  line-height: 1.15;
+  text-align: center;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: auto;
+  width: 100%;
+  padding: 0 bs.$spacer * 0.2;
+}
+
+button.bg-info {
+  margin: bs.$spacer * 0.1;
+  width: 99%; // 100% clips the rounded corner against the card border
+  padding: bs.$spacer * 0.625;
+  font-size: inherit;
+}
