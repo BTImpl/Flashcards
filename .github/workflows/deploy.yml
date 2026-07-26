@@ -11,15 +11,14 @@ jobs:
     permissions:
       contents: write
       pull-requests: read
-    env:
-      GH_TOKEN: ${{ secrets.GH_TOKEN }}
-
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Trello kártya azonosító kinyerése a commit üzenetből
         id: extract-card
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           PR_NUMBER=$(git log -1 --pretty=%B | grep -oP '#\K[0-9]+' | head -1 || true)
           if [ -n "$PR_NUMBER" ]; then
