@@ -11,6 +11,10 @@ on:
 
 jobs:
   run-task:
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
     # Cseréld le <org>-ot a saját GitHub org/felhasználóneveddre.
     uses: BTImpl/central-workflows/.github/workflows/claude-task.yml@main
     with:
