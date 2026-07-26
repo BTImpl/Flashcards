@@ -21,7 +21,10 @@ jobs:
       - name: Trello kártya azonosító kinyerése a commit üzenetből
         id: extract-card
         run: |
-          CARD_ID=$(git log -1 --pretty=%B | grep -oP 'Trello-Card-Id:\s*\K\S+' || true)
+          PR_NUMBER=$(git log -1 --pretty=%B | grep -oP '#\K[0-9]+' | head -1 || true)
+          if [ -n "$PR_NUMBER" ]; then
+            CARD_ID=$(gh pr view "$PR_NUMBER" --json body -q .body | grep -oP 'Trello-Card-Id:\s*\K\S+' || true)
+          fi
           echo "card_id=$CARD_ID" >> "$GITHUB_OUTPUT"
 
       - name: Trello kártya lezárása (Done)
