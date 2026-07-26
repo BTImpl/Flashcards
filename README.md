@@ -29,3 +29,5 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 Hello from automatized claude implementation
 
 Run full workflow...
+
+Run full workflow, now good?
