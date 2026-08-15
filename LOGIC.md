@@ -79,10 +79,16 @@ re-derives its own local (shuffled, indexed, scored) state from
 `wordStore.words()` whenever it changes.
 
 ### Initializing from URL query params
-`AppComponent` (`app.component.ts`) subscribes to the root `ActivatedRoute`'s
-`queryParamMap` (`take(1)`, since this is a one-time startup read, not a
-live binding — the URL is not kept in sync with later toggles) and, on the
-first emission, reads two optional params:
+`AppComponent` (`app.component.ts`) reads `window.location.search` directly
+via `URLSearchParams` in its constructor — a synchronous, one-time startup
+read, not a live binding (the URL is not kept in sync with later toggles).
+It deliberately does **not** go through `ActivatedRoute.queryParamMap`: that
+observable is backed by the root route's params as of Router construction,
+which is empty until the router's initial navigation resolves — asynchronous
+relative to `AppComponent`'s constructor — so a naive `take(1)` subscribe
+there grabs the pre-navigation empty value and silently no-ops. Reading
+`window.location.search` sidesteps Router timing entirely. It reads two
+optional params:
 - `user` — matched case-insensitively against `UsersEnum` values
   (`Gabi`/`Tomi`); if it matches, calls `wordStore.setSheet(...)`.
 - `list` — matched case-insensitively against `ListTypeEnum` values
