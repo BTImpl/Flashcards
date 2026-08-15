@@ -391,6 +391,32 @@ files only keep rules with no Bootstrap utility equivalent (e.g. `word-card`'s
 `.card h1`; `learn-words`' `#actualHu` wrap rules and the `.answers` grid's
 `minmax(0, 1fr)`/`min-height: 0` sizing, see §7/§8.3).
 
+### iOS "Add to Home Screen" safe-area handling
+`src/index.html`'s viewport meta has `viewport-fit=cover`, and carries
+`apple-mobile-web-app-capable=yes` + `apple-mobile-web-app-status-bar-style=
+black-translucent` — together these are what make iOS actually run the
+home-screen-installed app edge-to-edge (fullscreen, no Safari chrome,
+content drawn *under* the status bar/notch/Dynamic Island and home
+indicator) instead of opening it as a normal Safari tab. Without both
+`apple-mobile-web-app-capable` and `viewport-fit=cover`, `env(safe-area-inset-*)`
+resolves to `0` and none of the padding below has any effect — iOS only
+reports non-zero insets once the page opts into edge-to-edge rendering.
+`body` (`src/styles.scss`) pads itself on all four sides with
+`env(safe-area-inset-top/right/bottom/left)`. Since `app-root` (`app.component.html`)
+is a single `d-flex flex-column h-100` filling `body`, and neither
+`HeaderComponent` nor any page's `app-navigation-footer` uses
+`position: fixed`/`sticky` (they're just the first/last flex children,
+visually pinned to the viewport edges by the `h-100` flex-column layout, not
+by CSS positioning) — this one body-level padding is sufficient to inset
+the whole app from the notch/rounded corners/home indicator; there's no
+separate fixed/sticky element that needs its own safe-area padding. There is
+no `manifest.json` in this project (Android/Chrome-style PWA install isn't
+set up) — the iOS-only meta tags above are the only mechanism in play here.
+`word-card.component.html`'s `position-absolute top-0` speaker button is
+positioned relative to its own `.card` (which has `position-relative`), not
+the viewport, so it doesn't touch a real screen edge and needs no safe-area
+handling.
+
 ## 11. Known gaps / things to be aware of when changing code
 
 - Hardcoded Google API key + sheet ID in `WordsApiService` — flagged by the
