@@ -26,10 +26,13 @@ jobs:
         run: npm ci
 
       - name: Build (production, GitHub Pages base href)
-        run: npx ng build --configuration production --base-href /Flashcards/
+        run: npx ng build --configuration production --base-href /
 
       - name: Add SPA fallback for client-side routing
         run: cp dist/flashcards/browser/index.html dist/flashcards/browser/404.html
+
+      - name: Add custom domain CNAME
+        run: echo "flashcards.btimpl.eu" > dist/flashcards/browser/CNAME
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
