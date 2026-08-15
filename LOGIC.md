@@ -401,8 +401,22 @@ indicator) instead of opening it as a normal Safari tab. Without both
 `apple-mobile-web-app-capable` and `viewport-fit=cover`, `env(safe-area-inset-*)`
 resolves to `0` and none of the padding below has any effect — iOS only
 reports non-zero insets once the page opts into edge-to-edge rendering.
-`body` (`src/styles.scss`) pads itself on all four sides with
-`env(safe-area-inset-top/right/bottom/left)`. Since `app-root` (`app.component.html`)
+The safe-area padding must apply *only* when actually launched standalone
+from the home screen — not in a normal Safari tab, where Safari's own chrome
+already reserves the notch/home-indicator space and adding the padding again
+would double it up. `src/index.html` has an inline `<script>` in `<head>`
+that checks `window.navigator.standalone` (Apple's dedicated, WebKit-only
+boolean for "was this page launched from a home-screen icon") and, if true,
+adds an `ios-standalone` class to `<html>` — this runs before first paint
+since it's an inline, blocking `<script>` ahead of any content. **Deliberately
+not** used: the CSS `@media (display-mode: standalone)` feature — tried
+first, but empirically didn't match on-device for this app's non-manifest,
+meta-tag-only A2HS setup, silently zeroing out the padding it gated (the top
+inset disappeared, status bar clock/icons drew directly over the header).
+`window.navigator.standalone` is the older, iOS-specific, more reliable
+signal for this exact case. `body` (`src/styles.scss`) pads itself on all
+four sides with `env(safe-area-inset-top/right/bottom/left)`, scoped under
+the `html.ios-standalone body` selector. Since `app-root` (`app.component.html`)
 is a single `d-flex flex-column h-100` filling `body`, and neither
 `HeaderComponent` nor any page's `app-navigation-footer` uses
 `position: fixed`/`sticky` (they're just the first/last flex children,
