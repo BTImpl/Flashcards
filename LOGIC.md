@@ -67,12 +67,33 @@ An NgRx `signalStore` (`providedIn: 'root'`), the single source of truth for
   Pairing/LearnWords which tolerate an empty array directly).
 - `withMethods`: `toggleUser()` and `toggleListType()` — flip `selectedSheet`
   between `GABI`/`TOMI` and `selectedListType` between `KNOWN`/`UNKNOWN` via
-  `patchState`. These are the only way to mutate the store (SignalStore state
-  signals aren't directly settable from outside), called by `HeaderComponent`.
+  `patchState`, called by `HeaderComponent`. `setSheet(sheet: UsersEnum)` and
+  `setListType(listType: ListTypeEnum)` set either field to an explicit
+  value via `patchState`, called once at startup by `AppComponent` from the
+  URL query params (see below). Together these four methods are the only way
+  to mutate the store (SignalStore state signals aren't directly settable
+  from outside).
 
 This is the one piece of cross-page shared state; every page/`effect()`
 re-derives its own local (shuffled, indexed, scored) state from
 `wordStore.words()` whenever it changes.
+
+### Initializing from URL query params
+`AppComponent` (`app.component.ts`) subscribes to the root `ActivatedRoute`'s
+`queryParamMap` (`take(1)`, since this is a one-time startup read, not a
+live binding — the URL is not kept in sync with later toggles) and, on the
+first emission, reads two optional params:
+- `user` — matched case-insensitively against `UsersEnum` values
+  (`Gabi`/`Tomi`); if it matches, calls `wordStore.setSheet(...)`.
+- `list` — matched case-insensitively against `ListTypeEnum` values
+  (`KNOWN`/`UNKNOWN`); if it matches, calls `wordStore.setListType(...)`.
+
+An unrecognized or missing value for either param is silently ignored and
+the store keeps its default (`Gabi`/`UNKNOWN`). This lets a link like
+`?user=Tomi&list=KNOWN` be shared with a specific profile pre-selected —
+e.g. one URL for Gabi, a different one for Tomi — without needing a
+per-profile route. `HeaderComponent`'s toggle buttons still work as before
+and are unaffected by how the initial values were set.
 
 ## 5. Services
 

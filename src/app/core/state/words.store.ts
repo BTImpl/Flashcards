@@ -40,5 +40,11 @@ export const WordsStore = signalStore(
           store.selectedListType() === ListTypeEnum.KNOWN ? ListTypeEnum.UNKNOWN : ListTypeEnum.KNOWN,
       });
     },
+    setSheet(sheet: UsersEnum): void {
+      patchState(store, { selectedSheet: sheet });
+    },
+    setListType(listType: ListTypeEnum): void {
+      patchState(store, { selectedListType: listType });
+    },
   })),
 );
