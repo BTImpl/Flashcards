@@ -340,8 +340,10 @@ fallback and active language on startup (`TranslateService`'s constructor
 calls `.use(lang)`/`.setFallbackLang(lang)` from this config) — there is no
 language switcher in the UI for the *interface* language (the Hungarian text
 is just the raw word data, not translated UI strings). Flag images
-(`assets/images/en.png`, `hu.png`) are used only inside Learn Words'
-language-toggle button icon.
+(`assets/images/en.svg`, `hu.svg` — vector, sourced from flagcdn.com; kept as
+SVG rather than the previous 64×32 PNGs so the icon stays sharp at any
+display size/DPI) are used only inside Learn Words' language-toggle button
+icon.
 
 ## 10. Styling
 
