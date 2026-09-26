@@ -6,6 +6,7 @@ import { Injectable } from '@angular/core';
 export class WordService {
   private voices: SpeechSynthesisVoice[] = [];
   private hasPrimedSpeech = false;
+  private audioContext?: AudioContext;
 
   constructor() {
     this.loadVoices();
@@ -19,12 +20,44 @@ export class WordService {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         window.speechSynthesis.resume();
+        this.audioContext?.resume();
       }
     });
   }
 
   private loadVoices() {
     this.voices = window.speechSynthesis.getVoices();
+  }
+
+  // iOS mutes speechSynthesis (like any page audio) whenever the hardware
+  // mute switch is on, unless the page's audio session is promoted to the
+  // 'playback' category - only iOS can do that, only from inside a real
+  // user gesture, and only via this WebKit-only API (falls back to waking a
+  // WebAudio context for older iOS versions that lack it, which is reported
+  // to have the same silent-switch-bypassing effect).
+  private unlockAudioForSilentMode() {
+    const audioSession = (
+      navigator as Navigator & { audioSession?: { type: string } }
+    ).audioSession;
+    if (audioSession) {
+      audioSession.type = 'playback';
+    }
+
+    const AudioContextCtor =
+      window.AudioContext ??
+      (window as unknown as { webkitAudioContext?: typeof AudioContext })
+        .webkitAudioContext;
+    if (!AudioContextCtor) return;
+
+    this.audioContext ??= new AudioContextCtor();
+    if (this.audioContext.state !== 'running') {
+      this.audioContext.resume();
+    }
+
+    const source = this.audioContext.createBufferSource();
+    source.buffer = this.audioContext.createBuffer(1, 1, 22050);
+    source.connect(this.audioContext.destination);
+    source.start(0);
   }
 
   shuffle<T>(array: T[]): void {
@@ -59,6 +92,7 @@ export class WordService {
     // engine's second speak() call and gets heard.
     if (!this.hasPrimedSpeech) {
       this.hasPrimedSpeech = true;
+      this.unlockAudioForSilentMode();
       synth.speak(new SpeechSynthesisUtterance(' '));
     }
 

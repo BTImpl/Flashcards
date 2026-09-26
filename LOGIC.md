@@ -132,7 +132,18 @@ and are unaffected by how the initial values were set.
   immediately before the real one, in the same call/gesture — iOS Safari is
   documented to silently swallow only the first `speak()` call per session
   and work from the next one on, so this absorbs that throwaway failure
-  before the user's actual word.
+  before the user's actual word. That same first call also invokes
+  `unlockAudioForSilentMode()`, which (a) sets `navigator.audioSession.type =
+  'playback'` when the API exists (Safari 16.4+ only, feature-detected via
+  `'audioSession' in navigator`) and (b) creates/wakes an `AudioContext` and
+  plays a single silent sample through it, as a fallback for older iOS. Both
+  are the documented way to promote the page's WebKit audio session out of
+  the default `ambient` category — `ambient` is the one category the
+  hardware mute switch silences, and it's what every other fix in this
+  section leaves untouched, so speech kept failing specifically (only) with
+  the phone's silent switch on even after those. `audioContext` is cached on
+  the instance and also `resume()`d in the `visibilitychange` handler above
+  (iOS suspends `AudioContext`s on backgrounding same as `speechSynthesis`).
 
 ### `createShuffledWordList` (`utils/shuffled-word-list.ts`)
 Shared factory (not an Angular class — a plain function that internally calls
@@ -461,32 +472,52 @@ handling.
   also use the real pipe, e.g. `NavigationCardComponent` inside `HomeComponent`).
   This predates the 2026-07-22 CLAUDE.md-compliance refactor and is unrelated
   to it (verified: identical 6-failure set before and after).
-- **iOS home-screen speech synthesis (worked around 2026-09-26, see
-  `WordService` above; not yet confirmed fixed on a real device)**: on an
-  iPhone with this app pinned to the home screen (§10's `ios-standalone`
-  mode), `speechSynthesis.speak()` was reported completely silent — no
-  sound, no thrown error — while the exact same tap worked fine on a Mac in
-  Safari. This is a documented, long-standing WebKit behavior (not
-  standalone-mode-specific, but far more noticeable there since the pinned
-  tab is a fresh page load every time it's reopened, whereas a regular
-  Safari tab often stays alive across app switches): **the first
+- **iOS home-screen speech synthesis, silenced by the hardware mute switch
+  (worked around 2026-09-26, see `WordService` above; not yet confirmed
+  fixed on a real device)**: on an iPhone with this app pinned to the home
+  screen (§10's `ios-standalone` mode) and the *ringer/silent switch*
+  physically on, `speechSynthesis.speak()` was completely silent — no
+  sound, no thrown error — while the same tap worked fine with the switch
+  off, and always worked fine on a Mac in Safari (which has no hardware mute
+  switch). Root cause, confirmed via reading during this investigation, not
+  a guess: Safari puts a page's audio — `speechSynthesis` included — in the
+  WebKit `ambient` audio-session category by default, and `ambient` is
+  specifically the one category the hardware mute switch is defined to
+  silence; every other fix below this bullet was real but orthogonal, since
+  none of them touch the audio session category. There is no way to change
+  that category for `speechSynthesis` directly; the fix (`WordService`'s new
+  `unlockAudioForSilentMode()`, called from the same one-time
+  `hasPrimedSpeech` gate used for the priming utterance below) sets
+  `navigator.audioSession.type = 'playback'` where that WebKit-only API
+  exists (Safari 16.4+, feature-detected — `'playback'` is documented to be
+  exempt from the mute switch, unlike `ambient`), and as a fallback for
+  older iOS wakes a page-level `AudioContext` by playing one silent sample
+  through it, which several independent iOS PWA fixes report has the same
+  silent-switch-exempting effect. If speech is still silenced with the
+  switch on after this, the next candidate (seen in other projects' fixes
+  for this same bug, not yet needed here) is playing a real, non-silent
+  `<audio>` element from the same first tap — some iOS versions reportedly
+  need an actual `<audio>`/`<video>` element playing, not just an
+  `AudioContext` buffer, to fully promote the session.
+- **iOS home-screen speech synthesis, first-call-of-session failure (worked
+  around 2026-09-26, see `WordService` above)**: separately from the mute-
+  switch issue, on an iPhone with this app pinned to the home screen (a
+  fresh page load every time it's reopened, unlike a regular Safari tab
+  which often stays alive across app switches), the *first*
   `speechSynthesis.speak()` call of a page session silently fails and only
-  calls from that point on actually produce audio.** `WordService` now
-  burns that first failure on a disposable, near-silent utterance queued
-  immediately before every session's real first word (`hasPrimedSpeech`
-  flag), so the user's actual first tap is really the engine's second
-  `speak()` call. Also hardened alongside it, addressing other documented
-  contributing causes: only calls `cancel()` when something is actually
-  queued (an unconditional `cancel()` with nothing to cancel is a separate
-  known trigger for the same silent failure), calls `resume()` before
-  speaking (iOS is known to leave the queue paused after the app is
-  backgrounded — common for a home-screen pin — until resumed), and caches
-  `getVoices()` via the `voiceschanged` event instead of reading it
-  synchronously (confirmed via a real headless-Chrome speechSynthesis
-  instance to return `[]` for the first ~300ms after load, which would
-  otherwise lose the `en-GB` voice match on the session's first call). If a
-  future report says speech still fails on an iOS home-screen install after
-  this, the next candidate is iOS's shared audio-session "unlock" pattern —
-  playing a real `<audio>` element from a direct tap before any
-  `speechSynthesis` call — which several other iOS TTS integrations report
-  needing in addition to the priming-utterance trick above.
+  calls from that point on actually produce audio — a documented,
+  long-standing WebKit behavior, not standalone-mode-specific but far more
+  noticeable there. `WordService` burns that first failure on a disposable,
+  near-silent utterance queued immediately before every session's real
+  first word (the same `hasPrimedSpeech` flag as above), so the user's
+  actual first tap is really the engine's second `speak()` call. Also
+  hardened alongside it, addressing other documented contributing causes:
+  only calls `cancel()` when something is actually queued (an unconditional
+  `cancel()` with nothing to cancel is a separate known trigger for the same
+  silent failure), calls `resume()` before speaking (iOS is known to leave
+  the queue paused after the app is backgrounded — common for a home-screen
+  pin — until resumed), and caches `getVoices()` via the `voiceschanged`
+  event instead of reading it synchronously (confirmed via a real
+  headless-Chrome speechSynthesis instance to return `[]` for the first
+  ~300ms after load, which would otherwise lose the `en-GB` voice match on
+  the session's first call).
