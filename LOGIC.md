@@ -115,8 +115,18 @@ and are unaffected by how the initial values were set.
 ### `WordService` (`services/words.service.ts`)
 - `shuffle<T>(array: T[]): void` — in-place Fisher–Yates shuffle. Mutates and returns nothing.
 - `speakPhrase(text?)` — browser `speechSynthesis` TTS. No-ops on empty text.
-  Cancels any in-flight utterance first. Prefers an `en-GB` voice if available,
-  rate `0.9`.
+  Only calls `cancel()` if something is actually `speaking`/`pending` (an
+  unconditional `cancel()` with nothing queued, plus speaking into a still-
+  paused engine, are both known to make iOS silently swallow the following
+  `speak()` — see the standalone-PWA gap below). Calls `resume()` before
+  every `speak()` for the same reason. Prefers an `en-GB` voice, matched
+  against a `voices` list cached from the constructor and refreshed on the
+  `voiceschanged` event (`getVoices()` returns `[]` synchronously right after
+  load on most browsers, so reading it fresh on every call would usually
+  miss the `en-GB` voice on the first speak of a session). Rate `0.9`.
+  Constructor also adds a `visibilitychange` listener that calls
+  `speechSynthesis.resume()` whenever the page becomes visible again — see
+  §11 for why this matters specifically for the iOS home-screen install.
 
 ### `createShuffledWordList` (`utils/shuffled-word-list.ts`)
 Shared factory (not an Angular class — a plain function that internally calls
@@ -445,3 +455,21 @@ handling.
   also use the real pipe, e.g. `NavigationCardComponent` inside `HomeComponent`).
   This predates the 2026-07-22 CLAUDE.md-compliance refactor and is unrelated
   to it (verified: identical 6-failure set before and after).
+- **iOS standalone-PWA speech synthesis (fixed 2026-09-26, see `WordService`
+  above)**: on iOS, once the app is added to the home screen (§10's
+  `ios-standalone` mode), `speechSynthesis.speak()` used to silently do
+  nothing — no sound, no thrown error — while the exact same tap worked fine
+  in a normal Safari tab. Confirmed contributing causes (verified against a
+  real headless-Chrome speechSynthesis instance, not just docs): (1) an
+  unconditional `cancel()` call with nothing actually queued, and (2) reading
+  `getVoices()` synchronously on every call when the voice list is still
+  empty immediately after page load (it only populates asynchronously, ~300ms
+  later here, via `voiceschanged`) — both are documented WebKit standalone-
+  mode failure triggers. Also addressed: iOS is known to leave the speech
+  queue paused after the standalone app is backgrounded (switching apps,
+  locking the phone), which a plain tab doesn't suffer from as often. If a
+  future report says speech still fails only on iOS home-screen installs
+  after this fix, the next suspect is the audio-session "unlock" pattern used
+  by other iOS TTS workarounds (an empty/near-silent warm-up utterance fired
+  on the very first touch of the session) — not yet implemented here since it
+  couldn't be verified without a real device.

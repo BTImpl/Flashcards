@@ -4,6 +4,28 @@ import { Injectable } from '@angular/core';
   providedIn: 'root',
 })
 export class WordService {
+  private voices: SpeechSynthesisVoice[] = [];
+
+  constructor() {
+    this.loadVoices();
+    window.speechSynthesis.addEventListener('voiceschanged', () =>
+      this.loadVoices(),
+    );
+
+    // iOS leaves speechSynthesis stuck paused after a standalone home-screen
+    // app is backgrounded (app switch, lock screen) - silently swallowing
+    // every speak() call afterwards until resumed.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        window.speechSynthesis.resume();
+      }
+    });
+  }
+
+  private loadVoices() {
+    this.voices = window.speechSynthesis.getVoices();
+  }
+
   shuffle<T>(array: T[]): void {
     let currentIndex = array.length;
     while (currentIndex != 0) {
@@ -19,10 +41,17 @@ export class WordService {
   speakPhrase(text?: string) {
     if(!text) return;
 
-    window.speechSynthesis.cancel();
+    const synth = window.speechSynthesis;
+
+    // Cancelling with nothing queued, and speaking into a still-paused
+    // engine, are both known to silently no-op on iOS standalone PWAs.
+    if (synth.speaking || synth.pending) {
+      synth.cancel();
+    }
+    synth.resume();
+
     const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    const ukVoice = voices.find(
+    const ukVoice = this.voices.find(
       (v) => v.lang === 'en-GB' || v.lang.includes('GB'),
     );
 
@@ -33,6 +62,6 @@ export class WordService {
     utterance.lang = 'en-GB';
     utterance.rate = 0.9;
 
-    window.speechSynthesis.speak(utterance);
+    synth.speak(utterance);
   }
 }
