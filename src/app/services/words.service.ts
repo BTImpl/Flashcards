@@ -6,7 +6,6 @@ import { Injectable } from '@angular/core';
 export class WordService {
   private voices: SpeechSynthesisVoice[] = [];
   private hasPrimedSpeech = false;
-  private audioCtx: AudioContext | null = null;
 
   constructor() {
     this.loadVoices();
@@ -78,29 +77,43 @@ export class WordService {
     synth.speak(utterance);
   }*/
 
-    speakPhrase(text?: string) {
+
+private audioContext: AudioContext | null = null;
+private silentAudioEl: HTMLAudioElement | null = null;
+
+speakPhrase(text?: string) {
   if (!text) return;
 
-  // 1. Megkerülés: Web Audio Context elindítása a felhasználói interakcióban.
-  // Ez arra kényszeríti az iOS-t, hogy média csatornaként kezelje a lapot, ami áttöri a néma üzemmódot.
+  // 2. NÉMA ÜZEMMÓD ÁTTÖRÉSE (Csak az első interakciónál épül fel, utána újrahasznosul)
   try {
-    if (!this.audioCtx) {
-      this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-    }
-    if (this.audioCtx.state === 'suspended') {
-      this.audioCtx.resume();
+    if (!this.silentAudioEl) {
+      // Létrehozunk egy fizikai audio elemet
+      this.silentAudioEl = new Audio();
+      this.silentAudioEl.src = 'data:audio/mp3;base64,SUQzBAAAAAAAAFRYWFgAAAASAAADbWFqb3JfYnJhbmQAbXA0MgBUWFhYAAAAEgAAA21pbm9yX3ZlcnNpb24AMgBUWFhYAAAAHAAAA2NvbXBhdGlibGVfYnJhbmRzAG1wNDJtcDQxAAAAbVVsdGFjMAD/////gAAAAAAA//uQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAVVsdGFjMAD/////gAAAAAAA//uQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==';
+      this.silentAudioEl.loop = true; // Folyamatosan ébren tartja a média csatornát
+      this.silentAudioEl.volume = 0.01; // Szinte teljesen halk, de aktív
+
+      // iOS specifikus attribútumok, hogy ne ugorjon fel a rendszerszintű médialejátszó
+      this.silentAudioEl.setAttribute('playsinline', 'true');
+      this.silentAudioEl.setAttribute('x-webkit-airplay', 'allow');
+
+      // Létrehozzuk a kontextust és összekötjük az audio elemmel
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const source = this.audioContext.createMediaElementSource(this.silentAudioEl);
+      source.connect(this.audioContext.destination);
     }
 
-    // Létrehozunk egy csendes puffert és lejátsszuk
-    const buffer = this.audioCtx.createBuffer(1, 1, 22050);
-    const source = this.audioCtx.createBufferSource();
-    source.buffer = buffer;
-    source.connect(this.audioCtx.destination);
-    source.start(0);
+    // Minden gombnyomásra újraindítjuk/ébren tartjuk
+    if (this.audioContext && this.audioContext.state === 'suspended') {
+      this.audioContext.resume();
+    }
+    this.silentAudioEl.play().catch(err => console.log("Audio play sikertelen:", err));
+
   } catch (e) {
-    console.error("Web Audio API hiba:", e);
+    console.error("Néma üzemmód megkerülési hiba:", e);
   }
 
+  // 3. A SPEECH SYNTHESIS RÉSZ (A te meglévő logikád)
   const synth = window.speechSynthesis;
 
   if (synth.speaking || synth.pending) {
@@ -108,16 +121,13 @@ export class WordService {
   }
   synth.resume();
 
-  // A meglévő PWA első-hívás javításod
   if (!this.hasPrimedSpeech) {
     this.hasPrimedSpeech = true;
     synth.speak(new SpeechSynthesisUtterance(' '));
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
-  const ukVoice = this.voices.find(
-    (v) => v.lang === 'en-GB' || v.lang.includes('GB'),
-  );
+  const ukVoice = this.voices.find((v) => v.lang === 'en-GB' || v.lang.includes('GB'));
 
   if (ukVoice) {
     utterance.voice = ukVoice;
@@ -126,6 +136,11 @@ export class WordService {
   utterance.lang = 'en-GB';
   utterance.rate = 0.9;
 
-  synth.speak(utterance);
+  // iOS 16+ bug javítás: A Safari hajlamos eldobni a hangot, ha túl gyorsan hívjuk az Audio után.
+  // Egy minimális timeout garantálja, hogy a média csatorna már aktív legyen.
+  setTimeout(() => {
+    synth.speak(utterance);
+  }, 50);
 }
+
 }
