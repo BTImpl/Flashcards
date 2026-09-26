@@ -39,7 +39,7 @@ export class WordService {
     }
   }
 
-  speakPhrase(text?: string) {
+/*  speakPhrase(text?: string) {
     if(!text) return;
 
     const synth = window.speechSynthesis;
@@ -75,7 +75,41 @@ export class WordService {
     utterance.rate = 0.9;
 
     synth.speak(utterance);
+  }*/
+
+    speakPhrase(text?: string) {
+  if (!text) return;
+
+  const synth = window.speechSynthesis;
+
+  // Force the audio session into the "playback" category so iOS
+  // treats it like media playback and ignores the silent switch.
+  if ('audioSession' in navigator) {
+    (navigator as any).audioSession.type = 'playback';
   }
+
+  if (synth.speaking || synth.pending) {
+    synth.cancel();
+  }
+  synth.resume();
+
+  if (!this.hasPrimedSpeech) {
+    this.hasPrimedSpeech = true;
+    synth.speak(new SpeechSynthesisUtterance(' '));
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const ukVoice = this.voices.find(
+    (v) => v.lang === 'en-GB' || v.lang.includes('GB'),
+  );
+  if (ukVoice) {
+    utterance.voice = ukVoice;
+  }
+  utterance.lang = 'en-GB';
+  utterance.rate = 0.9;
+
+  synth.speak(utterance);
+}
 
 
 }
