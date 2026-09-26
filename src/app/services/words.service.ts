@@ -5,6 +5,7 @@ import { Injectable } from '@angular/core';
 })
 export class WordService {
   private voices: SpeechSynthesisVoice[] = [];
+  private hasPrimedSpeech = false;
 
   constructor() {
     this.loadVoices();
@@ -49,6 +50,17 @@ export class WordService {
       synth.cancel();
     }
     synth.resume();
+
+    // iOS Safari (especially home-screen "Add to Home Screen" installs)
+    // silently swallows the very first speak() call of a session and only
+    // produces audio from the next call onwards. Burning that first failure
+    // on a throwaway near-silent utterance, queued in the same gesture right
+    // before the real one, means the user's first real tap is actually the
+    // engine's second speak() call and gets heard.
+    if (!this.hasPrimedSpeech) {
+      this.hasPrimedSpeech = true;
+      synth.speak(new SpeechSynthesisUtterance(' '));
+    }
 
     const utterance = new SpeechSynthesisUtterance(text);
     const ukVoice = this.voices.find(

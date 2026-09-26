@@ -126,7 +126,13 @@ and are unaffected by how the initial values were set.
   miss the `en-GB` voice on the first speak of a session). Rate `0.9`.
   Constructor also adds a `visibilitychange` listener that calls
   `speechSynthesis.resume()` whenever the page becomes visible again — see
-  §11 for why this matters specifically for the iOS home-screen install.
+  §11 for why this matters specifically for the iOS home-screen install. Also
+  tracks a one-time `hasPrimedSpeech` flag: the *very first* `speakPhrase`
+  call of a session queues a disposable, near-silent (`' '`) utterance
+  immediately before the real one, in the same call/gesture — iOS Safari is
+  documented to silently swallow only the first `speak()` call per session
+  and work from the next one on, so this absorbs that throwaway failure
+  before the user's actual word.
 
 ### `createShuffledWordList` (`utils/shuffled-word-list.ts`)
 Shared factory (not an Angular class — a plain function that internally calls
@@ -455,21 +461,32 @@ handling.
   also use the real pipe, e.g. `NavigationCardComponent` inside `HomeComponent`).
   This predates the 2026-07-22 CLAUDE.md-compliance refactor and is unrelated
   to it (verified: identical 6-failure set before and after).
-- **iOS standalone-PWA speech synthesis (fixed 2026-09-26, see `WordService`
-  above)**: on iOS, once the app is added to the home screen (§10's
-  `ios-standalone` mode), `speechSynthesis.speak()` used to silently do
-  nothing — no sound, no thrown error — while the exact same tap worked fine
-  in a normal Safari tab. Confirmed contributing causes (verified against a
-  real headless-Chrome speechSynthesis instance, not just docs): (1) an
-  unconditional `cancel()` call with nothing actually queued, and (2) reading
-  `getVoices()` synchronously on every call when the voice list is still
-  empty immediately after page load (it only populates asynchronously, ~300ms
-  later here, via `voiceschanged`) — both are documented WebKit standalone-
-  mode failure triggers. Also addressed: iOS is known to leave the speech
-  queue paused after the standalone app is backgrounded (switching apps,
-  locking the phone), which a plain tab doesn't suffer from as often. If a
-  future report says speech still fails only on iOS home-screen installs
-  after this fix, the next suspect is the audio-session "unlock" pattern used
-  by other iOS TTS workarounds (an empty/near-silent warm-up utterance fired
-  on the very first touch of the session) — not yet implemented here since it
-  couldn't be verified without a real device.
+- **iOS home-screen speech synthesis (worked around 2026-09-26, see
+  `WordService` above; not yet confirmed fixed on a real device)**: on an
+  iPhone with this app pinned to the home screen (§10's `ios-standalone`
+  mode), `speechSynthesis.speak()` was reported completely silent — no
+  sound, no thrown error — while the exact same tap worked fine on a Mac in
+  Safari. This is a documented, long-standing WebKit behavior (not
+  standalone-mode-specific, but far more noticeable there since the pinned
+  tab is a fresh page load every time it's reopened, whereas a regular
+  Safari tab often stays alive across app switches): **the first
+  `speechSynthesis.speak()` call of a page session silently fails and only
+  calls from that point on actually produce audio.** `WordService` now
+  burns that first failure on a disposable, near-silent utterance queued
+  immediately before every session's real first word (`hasPrimedSpeech`
+  flag), so the user's actual first tap is really the engine's second
+  `speak()` call. Also hardened alongside it, addressing other documented
+  contributing causes: only calls `cancel()` when something is actually
+  queued (an unconditional `cancel()` with nothing to cancel is a separate
+  known trigger for the same silent failure), calls `resume()` before
+  speaking (iOS is known to leave the queue paused after the app is
+  backgrounded — common for a home-screen pin — until resumed), and caches
+  `getVoices()` via the `voiceschanged` event instead of reading it
+  synchronously (confirmed via a real headless-Chrome speechSynthesis
+  instance to return `[]` for the first ~300ms after load, which would
+  otherwise lose the `en-GB` voice match on the session's first call). If a
+  future report says speech still fails on an iOS home-screen install after
+  this, the next candidate is iOS's shared audio-session "unlock" pattern —
+  playing a real `<audio>` element from a direct tap before any
+  `speechSynthesis` call — which several other iOS TTS integrations report
+  needing in addition to the priming-utterance trick above.
