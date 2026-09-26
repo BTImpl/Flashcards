@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 export class WordService {
   private voices: SpeechSynthesisVoice[] = [];
   private hasPrimedSpeech = false;
-  private audioContext?: AudioContext;
+  private audioCtx: AudioContext | null = null;
 
   constructor() {
     this.loadVoices();
@@ -20,44 +20,12 @@ export class WordService {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') {
         window.speechSynthesis.resume();
-        this.audioContext?.resume();
       }
     });
   }
 
   private loadVoices() {
     this.voices = window.speechSynthesis.getVoices();
-  }
-
-  // iOS mutes speechSynthesis (like any page audio) whenever the hardware
-  // mute switch is on, unless the page's audio session is promoted to the
-  // 'playback' category - only iOS can do that, only from inside a real
-  // user gesture, and only via this WebKit-only API (falls back to waking a
-  // WebAudio context for older iOS versions that lack it, which is reported
-  // to have the same silent-switch-bypassing effect).
-  private unlockAudioForSilentMode() {
-    const audioSession = (
-      navigator as Navigator & { audioSession?: { type: string } }
-    ).audioSession;
-    if (audioSession) {
-      audioSession.type = 'playback';
-    }
-
-    const AudioContextCtor =
-      window.AudioContext ??
-      (window as unknown as { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext;
-    if (!AudioContextCtor) return;
-
-    this.audioContext ??= new AudioContextCtor();
-    if (this.audioContext.state !== 'running') {
-      this.audioContext.resume();
-    }
-
-    const source = this.audioContext.createBufferSource();
-    source.buffer = this.audioContext.createBuffer(1, 1, 22050);
-    source.connect(this.audioContext.destination);
-    source.start(0);
   }
 
   shuffle<T>(array: T[]): void {
@@ -72,7 +40,7 @@ export class WordService {
     }
   }
 
-  speakPhrase(text?: string) {
+  /*speakPhrase(text?: string) {
     if(!text) return;
 
     const synth = window.speechSynthesis;
@@ -92,7 +60,6 @@ export class WordService {
     // engine's second speak() call and gets heard.
     if (!this.hasPrimedSpeech) {
       this.hasPrimedSpeech = true;
-      this.unlockAudioForSilentMode();
       synth.speak(new SpeechSynthesisUtterance(' '));
     }
 
@@ -109,5 +76,56 @@ export class WordService {
     utterance.rate = 0.9;
 
     synth.speak(utterance);
+  }*/
+
+    speakPhrase(text?: string) {
+  if (!text) return;
+
+  // 1. Megkerülés: Web Audio Context elindítása a felhasználói interakcióban.
+  // Ez arra kényszeríti az iOS-t, hogy média csatornaként kezelje a lapot, ami áttöri a néma üzemmódot.
+  try {
+    if (!this.audioCtx) {
+      this.audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+    }
+    if (this.audioCtx.state === 'suspended') {
+      this.audioCtx.resume();
+    }
+
+    // Létrehozunk egy csendes puffert és lejátsszuk
+    const buffer = this.audioCtx.createBuffer(1, 1, 22050);
+    const source = this.audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.connect(this.audioCtx.destination);
+    source.start(0);
+  } catch (e) {
+    console.error("Web Audio API hiba:", e);
   }
+
+  const synth = window.speechSynthesis;
+
+  if (synth.speaking || synth.pending) {
+    synth.cancel();
+  }
+  synth.resume();
+
+  // A meglévő PWA első-hívás javításod
+  if (!this.hasPrimedSpeech) {
+    this.hasPrimedSpeech = true;
+    synth.speak(new SpeechSynthesisUtterance(' '));
+  }
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  const ukVoice = this.voices.find(
+    (v) => v.lang === 'en-GB' || v.lang.includes('GB'),
+  );
+
+  if (ukVoice) {
+    utterance.voice = ukVoice;
+  }
+
+  utterance.lang = 'en-GB';
+  utterance.rate = 0.9;
+
+  synth.speak(utterance);
+}
 }
